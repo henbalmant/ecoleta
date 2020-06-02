@@ -39,6 +39,8 @@ class CollectPointsController {
         });
     
         await trx('collect_points_items').insert(collectPointItems);
+
+        await trx.commit();
     
         return response.json({
             id: collect_points_id,
@@ -61,6 +63,24 @@ class CollectPointsController {
             .select('items.title');
 
         return response.json({ collect_point, items });
+    }
+
+    async index(request: Request, response: Response) {
+        const { city, uf, items } = request.query;
+
+        const parsedItems = String(items)
+            .split(',')
+            .map(item => Number(item.trim()));
+
+        const collect_points = await knex('collect_points')
+            .join('collect_points_items', 'collect_points.id', '=', 'collect_points_items.collect_points_id')
+            .whereIn('collect_points_items.items_id', parsedItems)
+            .where('city', String(city))
+            .where('uf', String(uf))
+            .distinct()
+            .select('collect_points.*');
+
+        return response.json(collect_points);
     }
 }
 
