@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import knex from '../database/connection';
 
 class CollectPointsController {
+
+    // create a collect point
     async create(request: Request, response: Response) {
         const {
             name,
@@ -48,6 +50,7 @@ class CollectPointsController {
         });
     }
 
+    // show a unique and specific collect point by id
     async show(request: Request, response: Response) {
         const { id } = request.params;
 
@@ -65,6 +68,7 @@ class CollectPointsController {
         return response.json({ collect_point, items });
     }
 
+    // list a bunch of collect points by query params
     async index(request: Request, response: Response) {
         const { city, uf, items } = request.query;
 
