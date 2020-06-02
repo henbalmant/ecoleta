@@ -45,6 +45,23 @@ class CollectPointsController {
             ...collectPoint,
         });
     }
+
+    async show(request: Request, response: Response) {
+        const { id } = request.params;
+
+        const collect_point = await knex('collect_points').where('id', id).first();
+
+        if (!collect_point) {
+            return response.status(400).json({ message: 'Collect Point not found.' });
+        }
+
+        const items = await knex('items')
+            .join('collect_points_items', 'items.id', '=', 'collect_points_items.items_id')
+            .where('collect_points_items.collect_points_id', id)
+            .select('items.title');
+
+        return response.json({ collect_point, items });
+    }
 }
 
 export default CollectPointsController;
