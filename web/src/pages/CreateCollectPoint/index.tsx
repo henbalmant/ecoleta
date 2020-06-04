@@ -1,6 +1,6 @@
-import React, { useEffect, useState, ChangeEvent } from 'react';
+import React, { useEffect, useState, ChangeEvent, FormEvent } from 'react';
 import { FiArrowLeft } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { Map, TileLayer, Marker } from 'react-leaflet';
 import { LeafletMouseEvent } from 'leaflet';
 import api from '../../services/api';
@@ -40,6 +40,8 @@ const CreateCollectPoint = () => {
     const [selectedCity, setSelectedCity] = useState('0');
     const [selectedItems, setSelectedItems] = useState<number[]>([]);
     const [selectedPosition, setSelectedPosition] = useState<[number, number]>([0,0]);
+
+    const history = useHistory();
 
     useEffect(() => {
         navigator.geolocation.getCurrentPosition(position => {
@@ -84,7 +86,7 @@ const CreateCollectPoint = () => {
     function handleSelectCity(event: ChangeEvent<HTMLSelectElement>) {
         const city = event.target.value;
 
-        setSelectedUf(city);
+        setSelectedCity(city);
     }
 
     function handleMapClick(event: LeafletMouseEvent) {
@@ -104,12 +106,39 @@ const CreateCollectPoint = () => {
         const alreadySelected = selectedItems.findIndex(item => item === id);
 
         if (alreadySelected >= 0) {
-            const filteredItems = selectedItems.filter(item => item != id);
+            const filteredItems = selectedItems.filter(item => item !== id);
 
             setSelectedItems(filteredItems)
         } else {
             setSelectedItems([ ...selectedItems, id ]);
         }
+    }
+
+    async function handleSubmit(event: FormEvent) {
+        event.preventDefault();
+
+        const { name, email, whatsapp } = inputData;
+        const uf = selectedUf;
+        const city = selectedCity;
+        const [latitude, longitude] = selectedPosition;
+        const items = selectedItems;
+
+        const data = {
+            name,
+            email,
+            whatsapp,
+            uf,
+            city,
+            latitude,
+            longitude,
+            items
+        }
+
+        await api.post('collect_points', data);
+
+        alert('Ponto de coleta cadastrado com sucesso!');
+
+        history.push('/');
     }
 
     return(
@@ -123,7 +152,7 @@ const CreateCollectPoint = () => {
                 </Link>
             </header>
 
-            <form>
+            <form onSubmit={handleSubmit}>
                 <h1>Cadastro do <br /> ponto de coleta</h1>
 
                 <fieldset>
