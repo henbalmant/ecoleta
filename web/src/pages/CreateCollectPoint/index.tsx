@@ -1,12 +1,27 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FiArrowLeft } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { Map, TileLayer, Marker } from 'react-leaflet';
+import api from '../../services/api';
 
 import './styles.css';
 import logo from '../../assets/logo.svg';
 
+interface Item {
+    id: number;
+    name: string;
+    image_url: string;
+}
+
 const CreateCollectPoint = () => {
+    const [items, setItems] = useState<Item[]>([]);
+
+    useEffect(() => {
+        api.get('items').then(response => {
+            setItems(response.data);
+        });
+    }, []);
+
     return(
         <div id="page-create-point">
             <header>
@@ -95,30 +110,12 @@ const CreateCollectPoint = () => {
                     </legend>
 
                     <ul className="items-grid">
-                        <li>
-                            <img src="http://localhost:3333/uploads/oleo.svg" alt="Teste"/>
-                            <span>Óleo de Cozinha</span>
+                        {items.map(item => (
+                            <li key={item.id}>
+                            <img src={item.image_url} alt={item.name} />
+                            <span>{item.name}</span>
                         </li>
-                        <li>
-                            <img src="http://localhost:3333/uploads/oleo.svg" alt="Teste"/>
-                            <span>Óleo de Cozinha</span>
-                        </li>
-                        <li className="selected">
-                            <img src="http://localhost:3333/uploads/oleo.svg" alt="Teste"/>
-                            <span>Óleo de Cozinha</span>
-                        </li>
-                        <li>
-                            <img src="http://localhost:3333/uploads/oleo.svg" alt="Teste"/>
-                            <span>Óleo de Cozinha</span>
-                        </li>
-                        <li>
-                            <img src="http://localhost:3333/uploads/oleo.svg" alt="Teste"/>
-                            <span>Óleo de Cozinha</span>
-                        </li>
-                        <li>
-                            <img src="http://localhost:3333/uploads/oleo.svg" alt="Teste"/>
-                            <span>Óleo de Cozinha</span>
-                        </li>
+                        ))}
                     </ul>
                 </fieldset>
 
