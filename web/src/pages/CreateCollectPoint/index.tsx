@@ -30,6 +30,12 @@ const CreateCollectPoint = () => {
 
     const [initialPosition, setInitialPosition] = useState<[number, number]>([0,0]);
 
+    const [inputData, setInputData] = useState({
+        name: '',
+        email: '',
+        whatsapp: '',
+    });
+
     const [selectedUf, setSelectedUf] = useState('0');
     const [selectedCity, setSelectedCity] = useState('0');
     const [selectedPosition, setSelectedPosition] = useState<[number, number]>([0,0]);
@@ -87,6 +93,10 @@ const CreateCollectPoint = () => {
         ]);
     }
 
+    function handleInputChange(event: ChangeEvent<HTMLInputElement>) {
+
+    }
+
     return(
         <div id="page-create-point">
             <header>
@@ -112,6 +122,7 @@ const CreateCollectPoint = () => {
                             type="text"
                             name="name"
                             id="name"
+                            onChange={handleInputChange}
                         />
                     </div>
 
@@ -122,6 +133,7 @@ const CreateCollectPoint = () => {
                                 type="email"
                                 name="email"
                                 id="email"
+                                onChange={handleInputChange}
                             />
                         </div>
 
@@ -131,6 +143,7 @@ const CreateCollectPoint = () => {
                                 type="text"
                                 name="whatsapp"
                                 id="whatsapp"
+                                onChange={handleInputChange}
                             />
                         </div>
                     </div>
