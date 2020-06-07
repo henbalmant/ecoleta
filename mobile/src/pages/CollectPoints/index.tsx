@@ -1,21 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import { Feather as Icon } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView , Image, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView , Image, SafeAreaView, Alert } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { SvgUri } from 'react-native-svg';
+import * as Location from 'expo-location';
 import api from '../../services/api';
 
 interface Item {
   id: number,
-  title: string,
+  name: string,
   image_url: string,
+}
+
+interface CollectPoint {
+  id: number,
+  image: string,
+  name: string,
+  latitude: number,
+  longitude: number,
 }
 
 const CollectPoints = () => {
     const [items, setItems] = useState<Item[]>([]);
+    const [collectPoints, setCollectPoints] = useState<CollectPoint[]>([]);
     const [selectedItems, setSelectedItems] = useState<number[]>([]);
+
+    const [initialPosition, setInitialPosition] = useState<[number, number]>([0,0]);
+
     const navigation = useNavigation();
+
+    useEffect(() => {
+      async function loadPosition() {
+        const { status } = await Location.requestPermissionsAsync();
+
+        if (status !== 'granted') {
+          Alert.alert('Oops...', 'Precisamos da sua autorização para obter sua localização.')
+          return;
+        }
+
+        const location = await Location.getCurrentPositionAsync();
+
+        const { latitude, longitude } = location.coords;
+        
+        setInitialPosition([
+          latitude,
+          longitude
+        ]);
+      }
+
+      loadPosition();
+
+    }, []);
 
     useEffect(() => {
       api.get('/items').then(response => {
@@ -23,12 +59,24 @@ const CollectPoints = () => {
       });
     }, []);
 
+    useEffect(() => {
+      api.get('collect_points', {
+        params: {
+          city: 'Belo Horizonte',
+          uf: 'MG',
+          items: [6]
+        }
+      }).then(response => {
+        setCollectPoints(response.data);
+      })
+    }, []);
+
     function handleNavigateBack() {
         navigation.goBack();
     }
 
-    function handleNavigatorToDetail() {
-        navigation.navigate('Detail');
+    function handleNavigatorToDetail(id: number) {
+        navigation.navigate('Detail', { collect_point_id: id });
     }
 
     function handleSelectItem(id: number) {
@@ -41,7 +89,7 @@ const CollectPoints = () => {
       } else {
           setSelectedItems([ ...selectedItems, id ]);
       }
-  }
+    }
 
     return (
         <SafeAreaView style={{ flex: 1 }}>
@@ -54,29 +102,34 @@ const CollectPoints = () => {
                 <Text style={styles.description}> Encontre no mapa um ponto de coleta.</Text>
 
                 <View style={styles.mapContainer}>
-                    <MapView
+                    { initialPosition[0] !== 0 && (
+                      <MapView
                         style={styles.map}
                         initialRegion={{
-                            latitude: -19.9224853,
-                            longitude: -43.9913397,
+                            latitude: initialPosition[0],
+                            longitude: initialPosition[1],
                             latitudeDelta: 0.014,
                             longitudeDelta: 0.014,
                         }}
-                    >
-                        <Marker
+                      >
+                        {collectPoints.map(collectPoint => (
+                          <Marker
+                            key={String(collectPoint.id)}
                             style={styles.mapMarker}
-                            onPress={handleNavigatorToDetail}
+                            onPress={() => handleNavigatorToDetail(collectPoint.id)}
                             coordinate={{
-                                latitude: -19.9224853,
-                                longitude: -43.9913397,
+                                latitude: collectPoint.latitude,
+                                longitude: collectPoint.longitude,
                             }}
-                        >
+                          >
                             <View style={styles.mapMarkerContainer}>
-                                <Image style={styles.mapMarkerImage} source={{ uri: 'https://images.unsplash.com/photo-1481669624812-c47721341026?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60' }} />
-                                <Text style={styles.mapMarkerTitle}>Mercado</Text>
+                                <Image style={styles.mapMarkerImage} source={{ uri: collectPoint.image }} />
+                                <Text style={styles.mapMarkerTitle}>{collectPoint.name}</Text>
                             </View>
-                        </Marker>
-                    </MapView>
+                          </Marker>
+                        ))}
+                      </MapView>
+                    ) }
                 </View>
             </View>
             <View style={styles.itemsContainer}>
