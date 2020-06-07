@@ -1,6 +1,6 @@
 import React from 'react';
 import { Feather as Icon } from '@expo/vector-icons';
-import { View, Image, StyleSheet, Text, ImageBackground,  } from 'react-native';
+import { View, Image, StyleSheet, Text, ImageBackground } from 'react-native';
 import { RectButton } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 
@@ -24,16 +24,16 @@ const Home = () => {
             </View>
 
             <View style={styles.footer}>
-                <RectButton style={styles.button} onPress={handleNavigateToCollectPoints}>
-                    <View style={styles.buttonIcon}>
-                        <Text>
-                            <Icon name="arrow-right" color="#FFF" size={24}></Icon>
-                        </Text>
-                    </View>
-                    <Text style={styles.buttonText}>
-                        Entrar
-                    </Text>
-                </RectButton>
+              <RectButton style={styles.button} onPress={handleNavigateToCollectPoints}>
+                  <View style={styles.buttonIcon}>
+                      <Text>
+                          <Icon name="arrow-right" color="#FFF" size={24}></Icon>
+                      </Text>
+                  </View>
+                  <Text style={styles.buttonText}>
+                      Veja pontos de coleta perto de você
+                  </Text>
+              </RectButton>
             </View>
         </ImageBackground>
     );

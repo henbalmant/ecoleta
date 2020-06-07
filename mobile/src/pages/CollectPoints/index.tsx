@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Feather as Icon } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView , Image, SafeAreaView, Alert } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { SvgUri } from 'react-native-svg';
@@ -62,14 +62,12 @@ const CollectPoints = () => {
     useEffect(() => {
       api.get('collect_points', {
         params: {
-          city: 'Belo Horizonte',
-          uf: 'MG',
-          items: [6]
+          items: [selectedItems]
         }
       }).then(response => {
         setCollectPoints(response.data);
       })
-    }, []);
+    }, [selectedItems]);
 
     function handleNavigateBack() {
         navigation.goBack();
