@@ -19,7 +19,7 @@ class CollectPointsController {
         const trx = await knex.transaction();
 
         const collectPoint = {
-            image: 'https://images.unsplash.com/photo-1481669624812-c47721341026?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60',
+            image: request.file.filename,
             name,
             email,
             whatsapp,
@@ -33,11 +33,14 @@ class CollectPointsController {
     
         const collect_points_id = insertedIds[0];
     
-        const collectPointItems = items.map((items_id: number) => {
-            return {
-                items_id,
-                collect_points_id,
-            };
+        const collectPointItems = items
+            .split(',')
+            .map((item: string) => Number(item.trim()))
+            .map((items_id: number) => {
+                return {
+                    items_id,
+                    collect_points_id,
+                };
         });
     
         await trx('collect_points_items').insert(collectPointItems);
@@ -65,7 +68,12 @@ class CollectPointsController {
             .where('collect_points_items.collect_points_id', id)
             .select('items.title');
 
-        return response.json({ collect_point, items });
+        const serializedCollectPoint = {
+            ...collect_point,
+            image_url: `http://localhost:3333/uploads/${collect_point.image}`,
+        }
+
+        return response.json({ collect_point: serializedCollectPoint, items });
     }
 
     // list a bunch of collect points by query params
@@ -84,7 +92,14 @@ class CollectPointsController {
             .distinct()
             .select('collect_points.*');
 
-        return response.json(collect_points);
+        const serializedCollectPoints = collect_points.map(collect_point => {
+            return {
+                ...collect_point,
+                image_url: `http://localhost:3333/uploads/${collect_point.image}`,
+            };
+        })
+    
+        return response.json(serializedCollectPoints);
     }
 }
 
